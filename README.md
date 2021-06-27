@@ -1,4 +1,4 @@
-# @usrc/bootstrap
+# @usrc/mist
 
 Just another useless react component
 
