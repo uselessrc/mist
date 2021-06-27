@@ -1,4 +1,4 @@
-import React, {Children, FC, ReactElement, useEffect} from 'react';
+import React, {Children, FC, ReactElement, useEffect, useState} from 'react';
 
 import {Cursor, Mask, MistFilter} from './components';
 import {useMistId} from './hooks';
@@ -32,12 +32,19 @@ export const Mist: FC<MistProps> = ({
 }) => {
   Children.only(children);
 
+  const [ended, setEnded] = useState(false);
   const id = useMistId();
 
   useEffect(() => {
-    Object.assign(requireMistTargetElement(id).style, {filter: `url(#${id})`});
+    Object.assign(requireMistTargetElement(id).style, {
+      filter: `url(#${id})`,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (ended) {
+    return <>{children}</>;
+  }
 
   return (
     <>
@@ -46,6 +53,7 @@ export const Mist: FC<MistProps> = ({
         blurSize={blurSize}
         strokeWidth={strokeWidth}
         scale={canvasScale}
+        onEnded={() => setEnded(true)}
       />
       {children}
       <Mask id={id} />

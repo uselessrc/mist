@@ -1,6 +1,6 @@
-import {Track} from '../track';
+export type Track = [x: number, y: number, start: number];
 
-export interface FilmOptions {
+export interface TrackerOptions {
   width: number;
   height: number;
   color: string;
@@ -10,12 +10,12 @@ export interface FilmOptions {
   tracks?: Track[];
 }
 
-export interface FilmData {
+export interface TrackerData {
   canvas: HTMLCanvasElement;
   next(track: Track): string;
 }
 
-export function Film({
+export function Tracker({
   tracks = [],
   width,
   height,
@@ -23,7 +23,7 @@ export function Film({
   color,
   lineWidth,
   scale,
-}: FilmOptions): FilmData {
+}: TrackerOptions): TrackerData {
   let canvas = document.createElement('canvas');
   let ctx = canvas.getContext('2d')!;
 

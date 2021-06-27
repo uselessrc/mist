@@ -1,34 +1,40 @@
 import React, {FC, useCallback, useEffect, useRef, useState} from 'react';
 
 import {useMistTargetRect, useThrottleCallback} from '../hooks';
-import {Track} from '../track';
-import {Film, FilmData} from '../utils';
+import {Track, Tracker, TrackerData, checkAllWhite} from '../utils';
 
 const THROTTLE_INTERVAL_MS = 16 * 4;
+
+const IMAGE_BACKGROUND_WHITE = '#FFF';
+const IMAGE_BACKGROUND_BLACK = '#000';
 
 export const MistFilter: FC<{
   id: string;
   blurSize: number;
   strokeWidth: number;
   scale: number;
-}> = ({id, blurSize, strokeWidth, scale}) => {
+  onEnded(): void;
+}> = ({id, blurSize, strokeWidth, scale, onEnded}) => {
   const rect = useMistTargetRect(id);
 
   const erasing = useRef(false);
-  const films = useRef<[FilmData, FilmData]>();
+  const trackers = useRef<[TrackerData, TrackerData]>();
 
   const [images, setImages] = useState<[string, string]>(['', '']);
 
   const next = (track: Track): void => {
-    if (!films.current) {
+    if (!trackers.current) {
       return;
     }
 
-    setImages(films.current.map(line => line.next(track)) as [string, string]);
+    setImages(
+      trackers.current.map(line => line.next(track)) as [string, string],
+    );
   };
 
   const onMouseDown = useCallback(
     ({clientX, clientY, target}: MouseEvent): void => {
+      // hack
       if ((target as HTMLElement).dataset.mask !== id) {
         return;
       }
@@ -40,7 +46,13 @@ export const MistFilter: FC<{
     [id, rect],
   );
 
-  const onMouseUp = (): boolean => (erasing.current = false);
+  const onMouseUp = (): void => {
+    erasing.current = false;
+
+    if (trackers.current && checkAllWhite(trackers.current[0].canvas)) {
+      onEnded();
+    }
+  };
 
   const onMouseMove = useThrottleCallback(
     ({clientX, clientY}: MouseEvent) => {
@@ -61,27 +73,30 @@ export const MistFilter: FC<{
 
     const {width, height} = rect;
 
-    films.current = [
-      Film({
+    trackers.current = [
+      Tracker({
         width,
         height,
         lineWidth: strokeWidth,
-        backgroundColor: '#000',
-        color: '#fff',
+        color: IMAGE_BACKGROUND_WHITE,
+        backgroundColor: IMAGE_BACKGROUND_BLACK,
         scale,
       }),
-      Film({
+      Tracker({
         width,
         height,
         lineWidth: strokeWidth,
-        backgroundColor: '#fff',
-        color: '#000',
+        color: IMAGE_BACKGROUND_BLACK,
+        backgroundColor: IMAGE_BACKGROUND_WHITE,
         scale,
       }),
     ];
 
     setImages(
-      films.current.map(film => film.canvas.toDataURL()) as [string, string],
+      trackers.current.map(tracker => tracker.canvas.toDataURL()) as [
+        string,
+        string,
+      ],
     );
 
     return () => {
