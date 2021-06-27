@@ -3,6 +3,7 @@
   "compilerOptions": {
     "composite": true,
     "lib": ["DOM", "ESNext"],
+    "jsx": "react",
     "outDir": "../../bld/library"
   }
 }

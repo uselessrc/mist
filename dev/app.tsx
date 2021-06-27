@@ -11,7 +11,7 @@ const App: FC = () => {
         <div
           style={{
             width: 400,
-            height: 400,
+            height: 800,
             backgroundImage:
               'url(https://i.loli.net/2021/06/27/ePcuHXl7L3sWEFN.jpg)',
             backgroundSize: 'cover',
